@@ -24,8 +24,8 @@ public class Application {
 //		int digit = 1;
 //		int fractionDigit = 2;
 		
-		BigDecimal min = BigDecimal.valueOf(1.1);
-		BigDecimal max = BigDecimal.valueOf(1.9);
+		BigDecimal min = BigDecimal.valueOf(0);
+		BigDecimal max = BigDecimal.valueOf(100);
 		
 //		BigDecimal min = findMin(fractionDigit);
 //		BigDecimal max = findMax(digit, fractionDigit);
@@ -37,9 +37,16 @@ public class Application {
 		BigDecimal addNum = findAddition(fractionDigit);
 		int maxSize = getMaxSize(min, max, fractionDigit);
 		
+		long start = System.currentTimeMillis();
 		for(int i = 0;i < maxSize;i++) {
 			
 			BigDecimal randomNumber = getRandomNumber(digit, fractionDigit);
+			System.out.println("first roll : " + randomNumber);
+			while(!validateInRange(randomNumber, min, max)) {
+				System.out.println("re-roll");
+				randomNumber = getRandomNumber(digit, fractionDigit);
+			}
+			
 			//validateSize();
 			if(usedList.size() >= maxSize) {
 				usedList.sort(comparator);
@@ -55,33 +62,29 @@ public class Application {
 //				throw new Exception("Exceed size : " + maxSize);
 			}
 			
-//			if(false) {
-//				System.out.println("put : " + randomNumber);
-//				usedList.add(randomNumber);	
-//			}else {
-				boolean positiveFlag = true;
-				BigDecimal tempAddNum = addNum;
-				
-//				randomNumber = randomNumber.add(tempAddNum);
-				
-				while(!validateInRange(randomNumber, min, max) || usedList.contains(randomNumber)) {
-					System.out.println("random : " + randomNumber);
+			boolean positiveFlag = true;
+			BigDecimal tempAddNum = addNum;
+								
+			while(!validateInRange(randomNumber, min, max) || usedList.contains(randomNumber)) {
+				System.out.println("random : " + randomNumber);
 
-					// problem when negative value
-					if(positiveFlag == true) {
-						randomNumber = randomNumber.add(tempAddNum);
-					}else{
-						randomNumber = randomNumber.subtract(tempAddNum);
-					}
-					
-					tempAddNum = tempAddNum.add(addNum);
-					positiveFlag = !positiveFlag;
+				// problem when negative value
+				if(positiveFlag == true) {
+					randomNumber = randomNumber.add(tempAddNum);
+				}else{
+					randomNumber = randomNumber.subtract(tempAddNum);
 				}
-				System.out.println("add closet Number : " + randomNumber);
-				usedList.add(randomNumber);
-//			}
+				
+				tempAddNum = tempAddNum.add(addNum);
+				positiveFlag = !positiveFlag;
+			}
+			System.out.println("add closet Number : " + randomNumber);
+			usedList.add(randomNumber);
+
 			
 		}
+		
+		
 		usedList.sort(comparator);
 		System.out.println("----------------");
 		
@@ -90,6 +93,10 @@ public class Application {
 		}
 		
 		System.out.println("size : " + usedList.size());
+		long end = System.currentTimeMillis();
+		long total = end-start;
+		System.out.println("total : " + total + "ms");
+		System.out.println("total : " + total/(1000) + "s");
 
 	}
 	
@@ -151,13 +158,16 @@ public class Application {
 	private static int findFraction(BigDecimal min,BigDecimal max) {
 		BigDecimal fractionMin = min.remainder(BigDecimal.ONE);
 		BigDecimal fractionMax = max.remainder(BigDecimal.ONE);
-		System.out.println("fraction min: " + fractionMin);
-		System.out.println("fraction max: " + fractionMax);
+		if(fractionMin.equals(BigDecimal.ZERO) && fractionMax.equals(BigDecimal.ZERO)) {
+			return 0;
+		}
 		int minLength = fractionMin.toString().length() - 2;
 		int maxLength = fractionMax.toString().length() - 2;
 		if(maxLength - minLength >=0) {
+			System.out.println("fraction size : " + maxLength);
 			return maxLength;
 		}else {
+			System.out.println("fraction size : " + minLength);
 			return minLength;
 		}
 	}
