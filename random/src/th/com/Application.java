@@ -1,6 +1,7 @@
 package th.com;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,59 +18,28 @@ public class Application {
 				return o1.compareTo(o2);
 			}
 		};
-		
-//		double[] a = {7,4,5,6,6,7,9,1,8,3};
-//		double[] a = {9,9,9,9,9,9,9,9,9,9};
-//		double[] a1 = {0,0,0};
-//		double[] a2 = {0,0,1};
-//		double[] a3 = {0,0,2};
-//		double[] a4 = {0,1,0};
-//		double[] a5 = {0,1,1};
-//		double[] a6 = {0,1,2};
-//		double[] a7 = {0,2,0};
-//		double[] a8 = {0,2,1};
-//		double[] a9 = {0,2,2};
-//		double[] a10 = {1,0,0};
-//		double[] a11 = {1,0,1};
-//		double[] a12 = {1,0,2};
-//		double[] a13 = {1,1,0};
-//		double[] a14 = {1,1,1};
-//		double[] a15 = {1,1,2};
-//		double[] a16 = {1,2,0};
-//		double[] a17 = {1,2,1};
-//		double[] a18 = {1,2,2};
-//		double[] a19 = {2,0,0};
-//		double[] a20 = {2,0,1};
-//		double[] a21 = {2,0,2};
-//		double[] a22 = {2,1,0};
-//		double[] a23 = {2,1,1};
-//		double[] a24 = {2,1,2};
-//		double[] a25 = {2,2,0};
-//		double[] a26 = {2,2,1};
-//		double[] a27 = {2,2,2};
-		
+				
 //		test();
 				
-		int digit = 1;
-		int fractionDigit = 2;
+//		int digit = 1;
+//		int fractionDigit = 2;
 		
-//		System.out.println(validateInRange(new BigDecimal(0.0),new BigDecimal(0.1),new BigDecimal(9.99)));
+		BigDecimal min = BigDecimal.valueOf(1.1);
+		BigDecimal max = BigDecimal.valueOf(1.9);
 		
-//		double min = 1.0;
-//		double max = 10.0;
+//		BigDecimal min = findMin(fractionDigit);
+//		BigDecimal max = findMax(digit, fractionDigit);
+		int numRandom = 991;
 		
-		BigDecimal min = findMin(fractionDigit);
-		BigDecimal max = findMax(digit, fractionDigit);
-		int numRandom = 990;
+		int digit = findDigit(max);
+		int fractionDigit = findFraction(min,max);
 		
 		BigDecimal addNum = findAddition(fractionDigit);
 		int maxSize = getMaxSize(min, max, fractionDigit);
 		
-		for(int i = 0;i < numRandom;i++) {
-			BigDecimal randomNumber = BigDecimal.valueOf(Math.random() * Math.pow(10, digit));	
-//			Double randomNumber  = a[i];
-			randomNumber = randomNumber.setScale(fractionDigit,RoundingMode.HALF_UP);
-			System.out.println("round random : " + randomNumber);
+		for(int i = 0;i < maxSize;i++) {
+			
+			BigDecimal randomNumber = getRandomNumber(digit, fractionDigit);
 			//validateSize();
 			if(usedList.size() >= maxSize) {
 				usedList.sort(comparator);
@@ -81,20 +51,21 @@ public class Application {
 				
 				System.out.println("size : " + usedList.size());
 				
-				throw new Exception("Exceed size : " + maxSize);
+				usedList.clear();
+//				throw new Exception("Exceed size : " + maxSize);
 			}
 			
-			if(! usedList.contains(randomNumber)) {
-				System.out.println("put : " + randomNumber);
-				usedList.add(randomNumber);	
-			}else {
+//			if(false) {
+//				System.out.println("put : " + randomNumber);
+//				usedList.add(randomNumber);	
+//			}else {
 				boolean positiveFlag = true;
 				BigDecimal tempAddNum = addNum;
 				
-				randomNumber = randomNumber.add(tempAddNum);
+//				randomNumber = randomNumber.add(tempAddNum);
 				
-				while((!validateInRange(randomNumber, min, max)) || usedList.contains(randomNumber)) {
-//					System.out.println("random : " + randomNumber);
+				while(!validateInRange(randomNumber, min, max) || usedList.contains(randomNumber)) {
+					System.out.println("random : " + randomNumber);
 
 					// problem when negative value
 					if(positiveFlag == true) {
@@ -108,7 +79,7 @@ public class Application {
 				}
 				System.out.println("add closet Number : " + randomNumber);
 				usedList.add(randomNumber);
-			}
+//			}
 			
 		}
 		usedList.sort(comparator);
@@ -164,16 +135,56 @@ public class Application {
 	
 	private static boolean validateInRange(BigDecimal randomNumber,BigDecimal min,BigDecimal max) {
 		boolean valid = false;
-		if(randomNumber.compareTo(max) < 0 && randomNumber.compareTo(min) >= 0) {
+		if(randomNumber.compareTo(max) <= 0 && randomNumber.compareTo(min) >= 0) {
 			valid = true;
 		}
 		return valid;
 	}
 	
+	private static int findDigit(BigDecimal max){
+		BigInteger temp = max.toBigInteger();
+		System.out.println("Digit : " + BigDecimal.valueOf(temp.toString().length()));
+
+		return temp.toString().length();
+	}
+	
+	private static int findFraction(BigDecimal min,BigDecimal max) {
+		BigDecimal fractionMin = min.remainder(BigDecimal.ONE);
+		BigDecimal fractionMax = max.remainder(BigDecimal.ONE);
+		System.out.println("fraction min: " + fractionMin);
+		System.out.println("fraction max: " + fractionMax);
+		int minLength = fractionMin.toString().length() - 2;
+		int maxLength = fractionMax.toString().length() - 2;
+		if(maxLength - minLength >=0) {
+			return maxLength;
+		}else {
+			return minLength;
+		}
+	}
+	
+	private static BigDecimal getRandomNumber(int digit,int fractionDigit) {
+		Double random = Math.random();
+		if(random.equals(Double.valueOf(1.0))) {
+			random = Double.sum(random, -Math.random());
+		}
+		BigDecimal randomNumber = BigDecimal.valueOf(random * Math.pow(10, digit));	
+		System.out.println("plain : " + randomNumber);
+		randomNumber = randomNumber.setScale(fractionDigit,RoundingMode.DOWN);
+		System.out.println("round random : " + randomNumber);
+		return randomNumber;
+	}
+	
 	private static void test() {
-		BigDecimal randomNumber = new BigDecimal(1);
-		BigDecimal max = new BigDecimal(2);
-		System.out.println(randomNumber.compareTo(max));
+		Double random = 1.0;
+		if(random.equals(Double.valueOf(1.0))) {
+			System.out.println("b4 : " + random);
+			random = Double.sum(random, -Math.random());
+			System.out.println("af : " + random);
+		}
+		BigDecimal randomNumber = BigDecimal.valueOf(random * Math.pow(10, 1));	
+		System.out.println("plain : " + randomNumber);
+		randomNumber = randomNumber.setScale(1,RoundingMode.DOWN);
+		System.out.println("round random : " + randomNumber);
 		
 	}
 	
